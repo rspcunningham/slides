@@ -1,0 +1,7 @@
+/* Rules and --variables every slide shares. Replace with the deck's own palette and type. */
+:root {
+  --bg: #fbfbf8;
+  --ink: #14213d;
+}
+body { font-family: Arial, sans-serif; color: var(--ink); }
+section { padding: 128px; background: var(--bg); display: flex; flex-direction: column; gap: 48px; }

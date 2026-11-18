@@ -1,0 +1,64 @@
+/* ImAGeD deck: navy + steel blue, matched to the essay's figures (#FDFDFD ground). */
+:root {
+  --paper: #FDFDFD;
+  --mist: #EEF2F6;
+  --navy: #13293D;
+  --steel: #3D6A92;
+  --ink: #13293D;
+  --body: #46566A;
+  --muted: #5C6876;
+  --on-dark: #F4F6F8;
+  --on-dark-soft: #B9C7D6;
+  --serif: 'Source Serif 4', Georgia, serif;
+  --math: 'STIX Two Text', 'Times New Roman', serif;
+  --sans: 'IBM Plex Sans', Arial, sans-serif;
+  --mono: 'IBM Plex Mono', 'Courier New', monospace;
+}
+body { font-family: var(--sans); color: var(--ink); }
+section { padding: 128px; background: var(--paper); display: flex; flex-direction: column; gap: 48px; }
+
+/* type scale: 112 / 64 / 40 / 30 / 24 */
+h1 { font-family: var(--serif); font-size: 112px; font-weight: 600; line-height: 1.05; margin: 0; }
+h2 { font-family: var(--serif); font-size: 64px; font-weight: 600; line-height: 1.1; margin: 0; color: var(--ink); }
+h3 { font-family: var(--sans); font-size: 30px; font-weight: 600; line-height: 1.25; margin: 0; color: var(--ink); }
+p { margin: 0; }
+.eyebrow { font-family: var(--mono); font-size: 24px; font-weight: 500; letter-spacing: 3px; text-transform: uppercase; color: var(--steel); }
+.lede { font-size: 40px; line-height: 1.3; color: var(--body); }
+.body { font-size: 30px; line-height: 1.45; color: var(--body); }
+.small { font-size: 24px; line-height: 1.4; color: var(--muted); }
+.eq { font-family: var(--math); font-style: italic; font-size: 40px; line-height: 1.3; color: var(--ink); }
+.head { display: flex; flex-direction: column; gap: 16px; }
+
+/* dark slides */
+section.dark { background: var(--navy); color: var(--on-dark); }
+section.dark h1, section.dark h2 { color: var(--on-dark); }
+section.dark .lede { color: var(--on-dark-soft); }
+section.dark .eyebrow { color: #8FB3D6; }
+section.dark .small { color: var(--on-dark-soft); }
+
+/* accent statement */
+section.accent { background: var(--steel); justify-content: center; }
+section.accent .quote { font-family: var(--serif); font-size: 64px; line-height: 1.2; color: #FFFFFF; width: 1500px; }
+section.accent .eyebrow { color: #E3ECF5; }
+
+/* statement on paper */
+section.statement { justify-content: center; }
+section.statement .big { font-family: var(--serif); font-size: 80px; line-height: 1.15; font-weight: 500; color: var(--ink); width: 1500px; }
+
+/* figure + text split */
+.split { display: flex; flex-direction: row; gap: 72px; align-items: center; flex: 1; }
+.split .text { display: flex; flex-direction: column; gap: 32px; }
+
+/* cards */
+.cards { display: grid; gap: 32px; }
+.card { background: var(--mist); padding: 48px; display: flex; flex-direction: column; gap: 20px; }
+.card .tag { font-family: var(--mono); font-size: 24px; color: var(--steel); letter-spacing: 2px; text-transform: uppercase; }
+.card .body { font-size: 28px; }
+.card .eq { font-size: 36px; }
+
+/* limits table */
+table.limits { font-family: var(--sans); font-size: 30px; color: var(--body); width: 100%; }
+table.limits th { color: var(--ink); text-align: left; }
+table.limits td, table.limits th { padding: 28px 24px; }
+
+.mono { font-family: var(--mono); }

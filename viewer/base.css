@@ -1,0 +1,96 @@
+/* The canvas every deck sits on. Mirrors the base rules of the Claude Slides format
+   (fixed 1920×1080 sections, tag defaults, table hairlines), plus the viewer's modes.
+   Loaded before the deck's own project/deck.css. */
+
+:root {
+  --slide-w: 1920px;
+  --slide-h: 1080px;
+}
+
+* { margin: 0; }
+
+html { background: #141416; }
+
+body {
+  font: 32px/1.2 sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Tag defaults: font-size and font-weight never inherit into h1–h3. */
+h1 { font-size: 96px; font-weight: 600; }
+h2 { font-size: 64px; font-weight: 600; }
+h3 { font-size: 44px; font-weight: 600; }
+p, li, h1, h2, h3, td, th { overflow-wrap: break-word; text-wrap: pretty; }
+
+/* A slide: one fixed page. Everything else about it is the deck's. */
+body > section {
+  position: relative;
+  width: var(--slide-w) !important;
+  height: var(--slide-h) !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+  isolation: isolate;
+  flex-shrink: 0;
+}
+:where(body > section) { background: #fff; }
+
+section[hidden],
+section > aside,
+noscript { display: none !important; }
+
+/* Tables draw their own hairlines. */
+table { width: 100%; border-collapse: separate; border-spacing: 0; border: solid #0003; border-width: 2px 0 0 2px; }
+th, td { padding: .35em .6em; text-align: left; border: solid #0003; border-width: 0 2px 2px 0; }
+
+/* Slides' own elements (drawn by elements.js). */
+x-shape, x-icon, x-embed { display: block; }
+x-shape { position: relative; }
+x-icon { width: 48px; height: 48px; flex: none; }
+x-connector {
+  display: block;
+  height: 0;
+  flex: none;
+  box-sizing: border-box;
+  border: 2px solid;
+  border-color: transparent !important;
+  pointer-events: none;
+}
+x-embed > template { display: none; }
+
+/* Fragments: hidden until their click. Low specificity so deck.css can restyle them. */
+:where(.fragment) { opacity: 0; transition: opacity 0.35s ease; }
+:where(.fragment.visible) { opacity: 1; }
+
+/* Present mode (set by the viewer): one slide at a time. */
+html.mode-present { background: transparent; }
+html.mode-present body {
+  position: relative;
+  width: var(--slide-w);
+  height: var(--slide-h);
+  overflow: hidden;
+}
+html.mode-present section:not(.is-active):not(.is-leaving) { display: none !important; }
+html.mode-present section.is-leaving {
+  position: absolute !important;
+  inset: 0 auto auto 0 !important;
+}
+
+/* Grid mode (set by the viewer): every slide as a thumbnail. */
+html.mode-grid body {
+  display: flex;
+  flex-wrap: wrap;
+  align-content: flex-start;
+  gap: 24px;
+  padding: 24px;
+  min-height: 100vh;
+}
+html.mode-grid section { zoom: var(--thumb-zoom, 0.2); cursor: pointer; }
+html.mode-grid section.is-active { outline: 16px solid #4c8dff; }
+
+/* No mode (/deck/?mode=all): slides stacked; prints one slide per page. */
+@page { size: var(--slide-w) var(--slide-h); margin: 0; }
+@media print {
+  html { background: none; }
+  section { break-after: page; }
+}

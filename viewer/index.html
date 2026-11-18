@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Deck</title>
+<link rel="stylesheet" href="/viewer/viewer.css">
+</head>
+<body>
+<main id="stage">
+  <iframe id="deck" title="Slides"></iframe>
+  <div id="error" hidden></div>
+</main>
+<aside id="notes" hidden>
+  <div class="notes-head">Speaker notes</div>
+  <div id="notes-text"></div>
+</aside>
+<nav id="bar" aria-label="Deck controls">
+  <button id="prev" title="Previous (←)" aria-label="Previous">‹</button>
+  <span id="counter">– / –</span>
+  <button id="next" title="Next (→)" aria-label="Next">›</button>
+  <span class="sep"></span>
+  <button id="grid-btn" title="All slides (G)">Grid</button>
+  <button id="notes-btn" title="Speaker notes (N)">Notes</button>
+  <button id="fs-btn" title="Full screen (F)">Full screen</button>
+</nav>
+<script type="module" src="/viewer/viewer.js"></script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+<section id="naive" style="gap:32px;">
+<div class="head">
+<p class="eyebrow">The method</p>
+<h2>The naive model</h2>
+</div>
+<img src="project/assets/model-naive.png" alt="Block diagram: the learned sample spectrum is shifted by each LED angle, filtered by an ideal disc-shaped lens and turned into intensity on the sensor, giving a predicted image compared with the measured one; gradient descent updates the sample." style="width:1380px; height:479px; object-fit:contain;">
+<div style="display:grid; grid-template-columns:1fr 1fr; gap:72px; flex:1; align-items:end;">
+<div style="display:flex; flex-direction:column; gap:12px;">
+<p class="eq" style="font-size:36px;">L ∼ Σⱼ ‖√(ŷⱼ + ε) − √(yⱼ + ε)‖²</p>
+<p class="body" style="font-size:28px;">A loss on the square root keeps the dark, high-angle captures from being drowned out.</p>
+</div>
+<div style="display:flex; flex-direction:column; gap:12px;">
+<p class="eq" style="font-size:36px;">U′(k) = M′(k) ⊙ S(k)</p>
+<p class="body" style="font-size:28px;">After training, swap in a disc the size of the synthetic aperture: a lens we never had.</p>
+</div>
+</div>
+</section>

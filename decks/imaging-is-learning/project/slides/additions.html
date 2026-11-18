@@ -1,0 +1,24 @@
+<section id="additions" style="background:var(--mist);">
+<div class="head">
+<p class="eyebrow">The fix</p>
+<h2>Three learned additions</h2>
+</div>
+<p class="eq" style="font-size:56px; font-style:italic;">ŷⱼ = gⱼ |uⱼ|² + bⱼ</p>
+<div class="cards" style="grid-template-columns:1fr 1fr 1fr; flex:1;">
+<div class="card" style="background:var(--paper);">
+<p class="tag">The lens</p>
+<h3>Zernike coefficients and a radius</h3>
+<p class="body">A handful of smooth aberration terms instead of a free pixel grid. The learned radius mattered: the NA spec was off by about 15%.</p>
+</div>
+<div class="card" style="background:var(--paper);">
+<p class="tag">LED brightness</p>
+<h3>One gain per LED</h3>
+<p class="body">Without it, a brighter LED tells the optimizer the sample is more transparent at that angle.</p>
+</div>
+<div class="card" style="background:var(--paper);">
+<p class="tag">Stray light</p>
+<h3>One uniform glow per capture</h3>
+<p class="body">A constant can’t draw structure, so it can’t steal signal. Switch it off and the cheetah-print texture returns.</p>
+</div>
+</div>
+</section>

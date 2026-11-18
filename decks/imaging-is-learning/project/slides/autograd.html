@@ -1,0 +1,25 @@
+<section id="autograd" style="background:var(--mist);">
+<div class="head">
+<p class="eyebrow">The method</p>
+<h2>From hand-derived updates to autograd</h2>
+</div>
+<div class="cards" style="grid-template-columns:1fr 1fr; flex:1;">
+<div class="card" style="background:var(--paper); justify-content:space-between;">
+<div style="display:flex; flex-direction:column; gap:20px;">
+<p class="tag">Classic · Gerchberg–Saxton, ePIE</p>
+<h3 style="font-size:40px;">Alternating projections</h3>
+<p class="body">Force each prediction to match its measured amplitude, then update the part of the spectrum that produced it.</p>
+</div>
+<p class="body" style="color:var(--ink);">Change the physics, and you derive a new update rule.</p>
+</div>
+<div class="card" style="background:var(--navy); justify-content:space-between;">
+<div style="display:flex; flex-direction:column; gap:20px;">
+<p class="tag" style="color:#9DBCDB;">ImAGeD</p>
+<h3 style="font-size:40px; color:var(--on-dark);">A differentiable forward model</h3>
+<p class="body" style="color:var(--on-dark-soft);">Write the simulation of the microscope once. Autograd supplies the gradients.</p>
+</div>
+<p class="body" style="color:var(--on-dark);">Change the physics, and nothing else changes.</p>
+</div>
+</div>
+<p class="small">Not new in itself: FP has been written in TensorFlow (Jiang et al., 2018), and the classic algorithms are effectively gradient descent (Zuo et al., 2016).</p>
+</section>

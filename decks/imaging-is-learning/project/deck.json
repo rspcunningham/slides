@@ -1,0 +1,75 @@
+{
+  "v": 5,
+  "createdOnFiles": {
+    "v": 1,
+    "at": "2026-11-18T17:41:44Z"
+  },
+  "lists": "css",
+  "format": {
+    "v": 1,
+    "shared": [
+      "project/deck.css"
+    ]
+  },
+  "title": "High resolution imaging is a learning problem",
+  "cover": "cover",
+  "order": [
+    "cover",
+    "result",
+    "idea",
+    "lens",
+    "trick",
+    "autograd",
+    "naive",
+    "fails",
+    "question",
+    "freedom",
+    "full-model",
+    "additions",
+    "mtf",
+    "nps",
+    "limits",
+    "close"
+  ],
+  "sections": {
+    "s1": {
+      "description": "ImAGeD doubles a microscope’s resolution by treating reconstruction as training.",
+      "start": "cover"
+    },
+    "s2": {
+      "description": "A lens is a low-pass filter; tilted light lets many captures cover a wider synthetic aperture.",
+      "start": "lens"
+    },
+    "s3": {
+      "description": "A differentiable model of the microscope, fit by gradient descent.",
+      "start": "autograd"
+    },
+    "s4": {
+      "description": "The textbook physics is slightly wrong; targeted freedom in the model fixes it.",
+      "start": "fails"
+    },
+    "s5": {
+      "description": "MTF and NPS show real signal, not hallucination; what still doesn’t work.",
+      "start": "mtf"
+    }
+  },
+  "faces": {
+    "source-serif-4": {
+      "family": "Source Serif 4",
+      "href": "https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400..700;1,8..60,400..700&family=IBM+Plex+Sans:wght@400;600&family=IBM+Plex+Mono:wght@400;500&family=STIX+Two+Text:ital,wght@0,400..700;1,400..700&display=swap"
+    },
+    "ibm-plex-sans": {
+      "family": "IBM Plex Sans",
+      "href": "https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400..700;1,8..60,400..700&family=IBM+Plex+Sans:wght@400;600&family=IBM+Plex+Mono:wght@400;500&family=STIX+Two+Text:ital,wght@0,400..700;1,400..700&display=swap"
+    },
+    "ibm-plex-mono": {
+      "family": "IBM Plex Mono",
+      "href": "https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400..700;1,8..60,400..700&family=IBM+Plex+Sans:wght@400;600&family=IBM+Plex+Mono:wght@400;500&family=STIX+Two+Text:ital,wght@0,400..700;1,400..700&display=swap"
+    },
+    "stix-two-text": {
+      "family": "STIX Two Text",
+      "href": "https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400..700;1,8..60,400..700&family=IBM+Plex+Sans:wght@400;600&family=IBM+Plex+Mono:wght@400;500&family=STIX+Two+Text:ital,wght@0,400..700;1,400..700&display=swap"
+    }
+  },
+  "designSystems": []
+}

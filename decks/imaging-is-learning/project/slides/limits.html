@@ -1,0 +1,13 @@
+<section id="limits">
+<div class="head">
+<p class="eyebrow">Limitations</p>
+<h2>What still doesn’t work</h2>
+</div>
+<table class="limits">
+<tr><th style="width:24%;">Limitation</th><th>Detail and next step</th></tr>
+<tr><td style="color:var(--ink);">Thin sample</td><td>The sample is one flat layer, so thick samples that scatter twice don’t fit. Next: a 3D voxel grid with propagation between slices.</td></tr>
+<tr><td style="color:var(--ink);">Memory</td><td>About 1,400 bytes of GPU memory per output pixel: ~180 GB for an 8 MP frame. Patches work, but leave seams.</td></tr>
+<tr><td style="color:var(--ink);">Single channel</td><td>Diffraction depends on wavelength, so colour needs three separate reconstructions.</td></tr>
+<tr><td style="color:var(--ink);">Data quality</td><td>High-angle captures sit just above sensor noise. Next: longer exposures at high angles, for more than ~2×.</td></tr>
+</table>
+</section>
