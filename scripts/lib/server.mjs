@@ -2,16 +2,19 @@
 //
 //   /                viewer UI
 //   /viewer/…        viewer assets (base.css, elements.js, …)
-//   /deck/           the assembled deck (?mode=all: every slide stacked, no viewer classes)
+//   /deck/           the assembled deck (?mode=all: every slide stacked, no viewer classes;
+//                    &fonts=basic: without the deck's faces, each stack's basic face shows)
 //   /deck/<path>     files from the deck folder (project/deck.css, project/assets/…)
 //   /_blob/<id>      a Claude asset id, looked up in project/assets/ (also /deck/_blob/<id>)
 //   /api/meta        { title, w, h, count }
+//   /api/pdf         the deck as a PDF, one slide per page (printed by headless Chrome)
 //   /events          server-sent events: one message per change in the deck folder
 
 import http from "node:http";
 import fs from "node:fs";
 import path from "node:path";
 import { ROOT, buildDeck, readIndex, slideIds, findBlob } from "./deck.mjs";
+import { exportPdf } from "./pdf.mjs";
 
 const VIEWER = path.join(ROOT, "viewer");
 
@@ -78,6 +81,10 @@ function serveUnder(res, root, rel) {
 export function createDeckServer(deckDir, { watch = true } = {}) {
   const clients = new Set();
 
+  // One export at a time: a second request while Chrome is printing gets the same file.
+  let pdfJob = null;
+  const pdf = () => (pdfJob ??= exportPdf(server.address().port, readIndex(deckDir)).finally(() => (pdfJob = null)));
+
   const server = http.createServer((req, res) => {
     let url;
     try {
@@ -101,13 +108,25 @@ export function createDeckServer(deckDir, { watch = true } = {}) {
       }
     }
 
+    if (p === "/api/pdf") {
+      const name = path.basename(deckDir).replace(/[^A-Za-z0-9._-]+/g, "-") || "deck";
+      new Promise((resolve) => resolve(pdf())).then(
+        ({ pdf }) => {
+          res.writeHead(200, { "Content-Type": "application/pdf", "Content-Length": pdf.length, "Content-Disposition": `attachment; filename="${name}.pdf"`, "Cache-Control": "no-store" });
+          res.end(pdf);
+        },
+        (e) => send(res, 500, JSON.stringify({ error: e.message }), MIME[".json"]),
+      );
+      return;
+    }
+
     if (p === "/deck") {
       res.writeHead(302, { Location: "/deck/" + url.search });
       return res.end();
     }
     if (p === "/deck/") {
       try {
-        return send(res, 200, buildDeck(deckDir, { mode: url.searchParams.get("mode") === "all" ? "all" : "present" }), MIME[".html"]);
+        return send(res, 200, buildDeck(deckDir, { mode: url.searchParams.get("mode") === "all" ? "all" : "present", fonts: url.searchParams.get("fonts") !== "basic" }), MIME[".html"]);
       } catch (e) {
         return send(res, 500, e.message);
       }

@@ -190,7 +190,9 @@
       const [x1, y1, x2, y2] = [val(attrs[0], RW), val(attrs[1], RH), val(attrs[2], RW), val(attrs[3], RH)];
       if ([x1, y1, x2, y2].some(Number.isNaN)) return;
       Object.assign(el.style, { position: "absolute", left: "0", top: "0", width: "0", height: "0", margin: "0", padding: "0" });
-      drawLine(overlay(el, 1, 1), route(el.getAttribute("route"), x1, y1, x2, y2), el._drawn, heads);
+      const pts = route(el.getAttribute("route"), x1, y1, x2, y2);
+      el._line = { pts, heads }; // read by the PowerPoint export
+      drawLine(overlay(el, 1, 1), pts, el._drawn, heads);
       return;
     }
 
@@ -203,6 +205,7 @@
     if (W < 1) pts = [[0, sy], [0, H - sy]];
     else if (H < 1) pts = [[sx, 0], [W - sx, 0]];
     else pts = [[sx, sy], [W - sx, H - sy]];
+    el._line = { pts, heads };
     drawLine(overlay(el, W, H), pts, el._drawn, heads);
     if (!el._observed) {
       el._observed = true;
@@ -271,7 +274,7 @@
   const EMBED_HEAD =
     '<!doctype html><meta charset="utf-8">' +
     "<meta http-equiv=\"Content-Security-Policy\" content=\"default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'; img-src data: blob:; font-src data:; media-src data: blob:\">" +
-    "<style>html,body{margin:0;background:transparent;overflow:hidden}</style>";
+    "<style>html,body{margin:0;background:transparent;overflow:hidden}html{print-color-adjust:exact}</style>";
 
   function renderEmbed(el) {
     const tpl = el.querySelector(":scope > template");
@@ -365,6 +368,13 @@
 
   withAllShown(renderAll);
 
+  // Draw the shapes and connectors again after a change of layout (the PowerPoint export makes one).
+  window.__deckRedraw = () =>
+    withAllShown(() => {
+      document.querySelectorAll("x-shape").forEach(renderShape);
+      document.querySelectorAll("x-connector").forEach(renderConnector);
+    });
+
   const settled = (img) =>
     img.complete
       ? null
@@ -374,10 +384,7 @@
         });
   const images = [...document.images].map(settled).filter(Boolean);
   window.__deckReady = Promise.all([document.fonts.ready, ...images]).then(() => {
-    withAllShown(() => {
-      document.querySelectorAll("x-shape").forEach(renderShape);
-      document.querySelectorAll("x-connector").forEach(renderConnector);
-    });
+    window.__deckRedraw();
     return true;
   });
 })();

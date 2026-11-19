@@ -91,6 +91,7 @@ body {
   z-index: 10;
 }
 #bar.show,
+#bar.busy,
 #bar:hover,
 #bar:focus-within,
 body.grid #bar {
@@ -125,3 +126,21 @@ body.grid #bar {
   margin: 0 4px;
   background: #34343a;
 }
+
+#pdf-btn { min-width: 92px; }
+
+#toast {
+  position: fixed;
+  left: 50%;
+  bottom: 72px;
+  transform: translateX(-50%);
+  max-width: min(560px, calc(100vw - 32px));
+  padding: 10px 14px;
+  background: #3a1d20;
+  border: 1px solid #6b2f35;
+  border-radius: 10px;
+  color: #ffd9d9;
+  white-space: pre-wrap;
+  z-index: 11;
+}
+#toast[hidden] { display: none; }

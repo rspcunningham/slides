@@ -11,6 +11,8 @@ const errorBox = $("#error");
 const bar = $("#bar");
 const gridBtn = $("#grid-btn");
 const notesBtn = $("#notes-btn");
+const pdfBtn = $("#pdf-btn");
+const toast = $("#toast");
 
 const st = {
   meta: { w: 1920, h: 1080, title: "Deck" },
@@ -395,6 +397,46 @@ function toggleFullscreen() {
   else document.documentElement.requestFullscreen?.();
 }
 
+// ---------- export ----------
+
+// The server prints the deck in headless Chrome and sends the file back.
+let exporting = false;
+let toastTimer;
+
+function say(msg) {
+  toast.textContent = msg;
+  toast.hidden = false;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => (toast.hidden = true), 8000);
+}
+
+async function exportPdf() {
+  if (exporting) return;
+  exporting = true;
+  toast.hidden = true;
+  bar.classList.add("busy");
+  pdfBtn.textContent = "Exporting…";
+  pdfBtn.disabled = true;
+  try {
+    const r = await fetch("/api/pdf", { cache: "no-store" });
+    if (!r.ok) throw new Error((await r.json().catch(() => ({}))).error || r.statusText);
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(await r.blob());
+    a.download = (st.meta.title.replace(/[\\/:*?"<>|\x00-\x1f]+/g, " ").trim().slice(0, 120) || "deck") + ".pdf";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 60000);
+  } catch (e) {
+    say("PDF export failed: " + (e.message || e));
+  } finally {
+    exporting = false;
+    bar.classList.remove("busy");
+    pdfBtn.textContent = "Export PDF";
+    update();
+  }
+}
+
 // ---------- layout ----------
 
 function fit() {
@@ -422,6 +464,7 @@ function update() {
   counter.textContent = n ? `${st.index + 1} / ${n}` : "– / –";
   $("#prev").disabled = st.mode !== "present" || (st.index === 0 && st.frag === 0);
   $("#next").disabled = st.mode !== "present" || !n || (st.index === n - 1 && st.frag >= stepGroups(cur()).length);
+  pdfBtn.disabled = !n || exporting;
   if (!n) return;
   const hash = `#slide-${st.index + 1}` + (st.frag ? `.${st.frag}` : "");
   if (location.hash !== hash) history.replaceState(null, "", hash);
@@ -504,6 +547,7 @@ $("#next").addEventListener("click", next);
 gridBtn.addEventListener("click", () => setMode(st.mode === "grid" ? "present" : "grid"));
 notesBtn.addEventListener("click", toggleNotes);
 $("#fs-btn").addEventListener("click", toggleFullscreen);
+pdfBtn.addEventListener("click", exportPdf);
 
 // Live reload: the server pings on any change in the deck folder.
 let reloadTimer;

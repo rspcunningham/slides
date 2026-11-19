@@ -13,6 +13,8 @@ Decks here use the same files as a Claude Slides artifact, kept on disk and show
 | Empty starting deck | `template/`: copy it, never edit it |
 | Show a deck in the browser (live-reloads) | `node scripts/view.mjs <slug>` |
 | Check a deck: screenshots + layout lint | `node scripts/preview.mjs <slug> [--slides 3,5-7]` |
+| Export a deck to PowerPoint (editable text, shapes, pictures, tables) | `node scripts/pptx.mjs <slug> [--out file.pptx] [--basic-fonts | --pictures]`: writes `decks/<slug>/<slug>.pptx` and prints what it left out or turned into a picture (`--basic-fonts`: for computers without the deck's fonts; `--pictures`: each slide as one picture, nothing editable). Only when the person asks for a PowerPoint file |
+| Export a deck to PDF (one slide per page, real text) | `node scripts/pdf.mjs <slug> [--out file.pdf] [--slides 3,5-7]`: writes `decks/<slug>/<slug>.pdf`. The viewer's **Export PDF** button downloads the same file. Only when the person asks for a PDF |
 | Viewer and renderer | `viewer/`: don't edit while making a deck |
 
 **New or not.** Check `decks/<slug>/project/deck.json` and the files under `project/slides/` before you write. No slide files and no `order` entries is a new deck: see Creating. Otherwise see Revising a deck. A deck with slides and no `format` key in its index is an inline deck, even if `order` is empty: see Revising a deck.

@@ -113,8 +113,9 @@ function inertEmbeds(html) {
 /**
  * The deck as one HTML page, served at /deck/ (so `project/…` paths resolve).
  * mode "present": the viewer shows one slide at a time. mode "all": every slide stacked.
+ * fonts false: the deck's faces are left out, so every font stack shows its next (basic) face.
  */
-export function buildDeck(deckDir, { mode = "present" } = {}) {
+export function buildDeck(deckDir, { mode = "present", fonts = true } = {}) {
   const idx = readIndex(deckDir);
   const { ids, present } = slideIds(deckDir, idx.order);
   const sections = ids.map((id) =>
@@ -129,7 +130,7 @@ export function buildDeck(deckDir, { mode = "present" } = {}) {
 <head>
 <meta charset="utf-8">
 <title>${esc(idx.title)}</title>
-${fontHead(idx.faces)}
+${fonts ? fontHead(idx.faces) : ""}
 <link rel="stylesheet" href="/viewer/base.css">
 ${sharedLinks}
 </head>
