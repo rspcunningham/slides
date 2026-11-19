@@ -2,3 +2,4 @@
 .DS_Store
 decks/*/*.pptx
 decks/*/*.pdf
+decks/*/*.deck

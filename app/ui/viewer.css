@@ -1,5 +1,6 @@
 :root {
   color-scheme: dark;
+  --strip-w: 236px;
   --chrome: #1c1c1f;
   --chrome-ink: #e8e8ea;
   --chrome-soft: #9a9aa2;
@@ -19,9 +20,36 @@ body {
   overflow: hidden;
 }
 
+#work {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+}
+
+/* The thumbnails down the left: there while flipping through, gone for the grid and full screen. */
+#strip {
+  flex: 0 0 var(--strip-w);
+  min-width: 0;
+  background: #17171a;
+  border-right: 1px solid #2c2c31;
+}
+#thumbs {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+body:not(.strip) #strip,
+body.grid #strip,
+:root:fullscreen #strip { display: none; }
+@media (max-width: 760px) {
+  #strip { display: none; }
+}
+
 #stage {
   position: relative;
   flex: 1;
+  min-width: 0;
   min-height: 0;
   overflow: hidden;
 }
@@ -75,9 +103,11 @@ body {
 
 #bar {
   position: fixed;
-  left: 50%;
+  left: var(--mid, 50%);
   bottom: 16px;
   transform: translateX(-50%);
+  width: max-content;
+  max-width: calc(100vw - 16px);
   display: flex;
   align-items: center;
   gap: 4px;
@@ -100,6 +130,7 @@ body.grid #bar {
 
 #bar button {
   appearance: none;
+  white-space: nowrap;
   border: 0;
   background: transparent;
   color: var(--chrome-ink);
@@ -127,11 +158,22 @@ body.grid #bar {
   background: #34343a;
 }
 
-#pdf-btn { min-width: 92px; }
+#pdf-btn { min-width: 48px; }
+#pptx-btn { min-width: 92px; }
+
+#bar a {
+  color: var(--chrome-ink);
+  text-decoration: none;
+  padding: 6px 10px;
+  border-radius: 8px;
+}
+#bar a:hover { background: #2c2c31; }
+
+#error a { color: #9db8ff; }
 
 #toast {
   position: fixed;
-  left: 50%;
+  left: var(--mid, 50%);
   bottom: 72px;
   transform: translateX(-50%);
   max-width: min(560px, calc(100vw - 32px));
@@ -142,5 +184,10 @@ body.grid #bar {
   color: #ffd9d9;
   white-space: pre-wrap;
   z-index: 11;
+}
+#toast.note {
+  background: #1f2430;
+  border-color: #38425a;
+  color: #dfe6f7;
 }
 #toast[hidden] { display: none; }

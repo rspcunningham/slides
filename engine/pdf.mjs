@@ -1,18 +1,23 @@
 // A deck as a PDF, one slide per page. Headless Chrome lays the deck out and prints it, so text
 // stays text (it can be selected and searched, and is sharp at any zoom) and links still work.
 
+import { readIndex } from "./deck.mjs";
+import { createRenderServer } from "./serve.mjs";
 import { launch, evaluate, openDeck } from "./chrome.mjs";
 
 /**
- * Print the deck a deck server (createDeckServer) is serving on `port`.
+ * Print the deck in the folder deckDir.
  * only: a Set of slide numbers to keep (1-based), or null for every slide.
- * Returns { pdf: Buffer, pages, total }.
+ * Returns { pdf: Buffer, pages, total, index }.
  */
-export async function exportPdf(port, index, { only = null } = {}) {
-  const browser = await launch();
+export async function exportPdf(deckDir, { only = null } = {}) {
+  const index = readIndex(deckDir);
+  const server = await createRenderServer(deckDir);
+  let browser;
   try {
+    browser = await launch();
     const { send } = browser;
-    await openDeck(browser, port, index);
+    await openDeck(browser, server.url, index);
 
     // A clip prints as its still: put the picture back where elements.js made a <video>.
     const total = await evaluate(
@@ -54,8 +59,9 @@ export async function exportPdf(port, index, { only = null } = {}) {
       if (part.eof) break;
     }
     await send("IO.close", { handle: stream });
-    return { pdf: Buffer.concat(chunks), pages: pages ? pages.length : total, total };
+    return { pdf: Buffer.concat(chunks), pages: pages ? pages.length : total, total, index };
   } finally {
-    browser.close();
+    browser?.close();
+    server.close();
   }
 }

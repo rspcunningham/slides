@@ -95,25 +95,29 @@ The pipeline:
 
 ```
 decks/<slug>/project/…   decks, in exactly Claude's file format
-template/                empty starting deck
-scripts/view.mjs         serve a deck + open the browser, live reload (SSE + fs.watch)
-scripts/preview.mjs      headless Chrome via the DevTools protocol: screenshots + layout lint
-scripts/lib/             deck assembly + HTTP server
-viewer/                  viewer UI, base.css, elements.js (x-shape/x-connector/x-icon/x-embed)
-.claude/skills/slides/   SKILL.md + Claude's reference docs, adapted
+.claude/skills/slides/   the skill: SKILL.md + Claude's reference docs, adapted; template/ (empty starting deck)
+app/                     the viewer app: one long-running server for any number of decks (slides.mjs, server.mjs, ui/)
+engine/                  deck assembly, serving, headless Chrome via the DevTools protocol, PDF, PowerPoint, .deck files
+engine/render/           base.css, elements.js (x-shape/x-connector/x-icon/x-embed)
+scripts/                 preview.mjs (screenshots + layout lint), pptx.mjs, pdf.mjs, pack.mjs
 ```
 
 No dependencies; Node 22+ and a system Chrome. Commands:
 
 ```sh
-node scripts/view.mjs <slug>                    # → http://127.0.0.1:4300/
+node app/slides.mjs open <slug>                 # → http://127.0.0.1:4300/d/<slug>/
 node scripts/preview.mjs <slug> [--slides 3,5-7]
 ```
+
+The skill and the viewer were one thing at first: `scripts/view.mjs` served one deck per process, and the skill
+started it. They were split on 2026-11-19. The app now runs by itself and takes a deck (a folder, or a `.deck`
+zip of one) from anywhere on disk; the skill only writes decks and hands them over with `open`; the engine is
+what both use, and the preview and exports start their own private server, so they need no app.
 
 ### Design decisions that worked
 
 - **Same format as Claude, not a look-alike.** Our first version invented its own `deck.json` and dropped the `x-*` elements. That made Claude's reference docs unusable, because `diagrams.md` and `diagram-recipes.md` depend on `x-connector` and `x-shape`. Matching the format exactly meant the docs could be copied with only their tooling bits changed.
-- **The browser is the renderer.** Each slide is inserted as raw HTML into one document (`/deck/`) and shown in a same-origin **iframe**, which keeps deck CSS away from the viewer's controls. The same page is what the preview script drives, and what a PPTX exporter would use later.
+- **The browser is the renderer.** Each slide is inserted as raw HTML into one document (`…/deck/`) and shown in a same-origin **iframe**, which keeps deck CSS away from the viewer's controls. The same page is what the preview script drives, and what a PPTX exporter would use later.
 - **Assets live in `project/assets/`**, referenced by path. `/_blob/<id>` is also served, looked up by file name, so decks copied from Claude work.
 - **`<x-embed>` content is wrapped in `<template>` on the server,** so its scripts never run in the deck page. A client script moves it into a sandboxed iframe with a strict content security policy.
 

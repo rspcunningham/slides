@@ -88,13 +88,16 @@ export async function evaluate(send, expression) {
   return r.result.value;
 }
 
-/** Open a deck's every-slide page at the slide's own size and wait for fonts and pictures. */
-export async function openDeck({ send, once }, port, { w, h }, { basicFonts = false } = {}) {
+/**
+ * Open a deck's every-slide page at the slide's own size and wait for fonts and pictures.
+ * deckUrl: the assembled deck's address (a render server's `url`).
+ */
+export async function openDeck({ send, once }, deckUrl, { w, h }, { basicFonts = false } = {}) {
   await send("Page.enable");
   await send("Runtime.enable");
   await send("Emulation.setDeviceMetricsOverride", { width: w, height: h, deviceScaleFactor: 1, mobile: false });
   const loaded = once("Page.loadEventFired");
-  await send("Page.navigate", { url: `http://127.0.0.1:${port}/deck/?mode=all${basicFonts ? "&fonts=basic" : ""}` });
+  await send("Page.navigate", { url: `${deckUrl}?mode=all${basicFonts ? "&fonts=basic" : ""}` });
   await loaded;
   // The finished look: every step shown, animations at their end, no transitions.
   await evaluate(

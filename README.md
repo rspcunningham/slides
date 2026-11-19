@@ -3,47 +3,100 @@
 Decks in the Claude Slides file format, written by Claude Code and shown in your browser.
 A deck folder here is the same set of files as a Claude Slides artifact.
 
-```
-decks/<slug>/project/deck.json        the index: title, order, sections, fonts (faces)
-decks/<slug>/project/deck.css         rules every slide shares
-decks/<slug>/project/slides/<id>.html one <section> per slide, 1920×1080
-decks/<slug>/project/assets/          pictures, clips, font files
-decks/<slug>/.preview/                screenshots from the preview script (git-ignored)
+The repo has three parts, and each can change without the others:
 
-template/                  empty starting deck
-scripts/view.mjs           show a deck in the browser (live reload)
+| Part | What it is | Where |
+|---|---|---|
+| **The skill** | What Claude Code reads to write a deck: the format, the design rules, an empty starting deck | `.claude/skills/slides/` |
+| **The viewer app** | One long-running local server that shows any number of decks and exports them | `app/` |
+| **The engine** | The format reader, the renderer and the exports, which the other two both use | `engine/`, with command-line tools in `scripts/` |
+
+What passes between the skill and the app is a **deck**: a folder, or the same folder packed into one `.deck` file.
+The skill writes it; the app opens it from wherever it is on disk.
+
+```
+<deck>/project/deck.json        the index: title, order, sections, fonts (faces)
+<deck>/project/deck.css         rules every slide shares
+<deck>/project/slides/<id>.html one <section> per slide, 1920×1080
+<deck>/project/assets/          pictures, clips, font files
+<deck>/.preview/                screenshots from the preview script (git-ignored)
+
+.claude/skills/slides/     the skill: SKILL.md, reference/, template/ (the empty starting deck)
+app/slides.mjs             the app's command: open, list, close, status, stop, restart, serve
+app/server.mjs             the app's server; app/ui/ its pages
+engine/                    reading a deck, serving it, driving Chrome, PDF and PowerPoint, .deck files
+engine/render/             what every deck page loads (x-shape, x-connector, x-icon, x-embed)
 scripts/preview.mjs        screenshot every slide + lint the layout
 scripts/pptx.mjs           export a deck to PowerPoint (.pptx)
 scripts/pdf.mjs            export a deck to PDF
-viewer/                    the viewer and renderer (x-shape, x-connector, x-icon, x-embed, motion)
-.claude/skills/slides/     the skill: format, design rules, and references
+scripts/pack.mjs           pack a deck folder into one .deck file, or unpack one
+decks/                     the decks Claude Code writes here
 ```
 
 ## Use
 
-Open Claude Code in this folder and ask for a deck. The `slides` skill writes it, starts the viewer,
-runs the preview, and fixes what it finds.
+Open Claude Code in this folder and ask for a deck. The `slides` skill writes it under `decks/<slug>/`, opens it
+in the viewer app, runs the preview, and fixes what it finds.
+
+### The viewer app
 
 ```sh
-node scripts/view.mjs <slug>                    # open in the browser; --port N, --no-open
-node scripts/preview.mjs <slug>                 # screenshots in decks/<slug>/.preview/ + a report
-node scripts/preview.mjs <slug> --slides 3,5-7  # just some slides
-node scripts/pptx.mjs <slug>                    # decks/<slug>/<slug>.pptx; --out FILE, --slides 3,5-7, --basic-fonts, --pictures
+node app/slides.mjs open <deck>     # a deck folder, a .deck file, or a name under ./decks/
+node app/slides.mjs open            # the list of open decks
+node app/slides.mjs list            # the open decks and their addresses
+node app/slides.mjs close <deck>    # a key, folder or file; or: close all
+node app/slides.mjs status
+node app/slides.mjs stop
+node app/slides.mjs restart         # after changing the app's own code; keeps the same decks open
+node app/slides.mjs serve           # run it in this terminal instead of the background
 ```
 
-Viewer keys: → / Space next · ← back · Home / End · G all slides · N notes · F full screen.
-`#slide-5` in the URL opens slide 5. `/deck/?mode=all` shows every slide stacked (prints one per page).
+`open` starts the app if it isn't running, and returns at once: the app stays up at `http://127.0.0.1:4300/`
+(`--port N` or `SLIDES_PORT` for another port) until you stop it. Each deck has its own address,
+`http://127.0.0.1:4300/d/<name>/`, and reloads when its files change. `open` brings up a browser tab only when
+no tab is showing that deck (`--no-open`: never).
 
-**Export PDF** in the viewer's bar downloads the deck as a PDF, one slide per page at the slide's own size.
-Text stays text (it can be selected and searched) and links work. Every step is shown, animations stand at
-their end, and a clip is its still. `node scripts/pdf.mjs <slug>` writes the same file from the command line
-(`decks/<slug>/<slug>.pdf`; `--out FILE`, `--slides 3,5-7`).
+The first page lists the open decks. Open another there by its path, or choose or drop in a `.deck` file.
+The app keeps no record between runs: a deck is open until you close it or the app stops.
+
+The viewer shows the slides as thumbnails down the left, as PowerPoint does: click one to go to it. They hide in
+the grid and in full screen.
+
+Viewer keys: → / Space next · ← back · Home / End · T thumbnails · G all slides · N notes · F full screen.
+`#slide-5` in the address opens slide 5. `…/d/<name>/deck/?mode=all` shows every slide stacked (prints one per page).
+
+**PDF** and **PowerPoint** in the viewer's bar download the deck in that form. The PDF has one slide per page at
+the slide's own size: text stays text (it can be selected and searched) and links work. Every step is shown,
+animations stand at their end, and a clip is its still.
+
+### One file
+
+```sh
+node scripts/pack.mjs <deck>                       # <deck>/<name>.deck; --out FILE
+node scripts/pack.mjs --unpack <file.deck> [dir]   # back to a deck folder
+```
+
+A `.deck` file is a zip of the deck's `project/` folder, for sending a deck to someone. The app opens it like a
+folder, and shows it again when the file changes. A `.zip` someone made of a deck folder by hand opens too.
+
+### The tools
+
+These work on a deck folder with no app running.
+
+```sh
+node scripts/preview.mjs <deck>                 # screenshots in <deck>/.preview/ + a report
+node scripts/preview.mjs <deck> --slides 3,5-7  # just some slides
+node scripts/pptx.mjs <deck>                    # <deck>/<name>.pptx; --out FILE, --slides 3,5-7, --basic-fonts, --pictures
+node scripts/pdf.mjs <deck>                     # <deck>/<name>.pdf; --out FILE, --slides 3,5-7
+```
+
+`<deck>` is a path to a deck folder, or a bare name looked up under `./decks/`.
 
 Needs Node 22+ and, for the preview and the PowerPoint and PDF exports, Chrome (or Chromium, Edge, Brave, or `CHROME_PATH`). No npm install.
 
 ## PowerPoint
 
-`node scripts/pptx.mjs <slug>` writes a real PowerPoint file, not pictures of slides. It lays the deck out in
+`node scripts/pptx.mjs <deck>` (or the viewer's **PowerPoint** button) writes a real PowerPoint file, not pictures of slides. It lays the deck out in
 headless Chrome, reads every slide out as positions and styles, and writes those as PowerPoint's own objects:
 
 | In the deck | In the file |
@@ -78,5 +131,5 @@ A weight of 600 or more is PowerPoint's bold, and lighter weights are regular: i
 
 The files match, with one difference: Claude stores pictures and fonts as uploaded assets (`/_blob/<id>`),
 here they are files in `project/assets/` named by path. A deck copied from Claude works here once its
-assets are saved into `project/assets/` under their ids. Going the other way, upload each asset and
+assets are saved into `project/assets/` under their ids: the app serves `/_blob/<id>` from the deck the page belongs to. Going the other way, upload each asset and
 change its `src` to the `/_blob/<id>` the upload returns.

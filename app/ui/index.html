@@ -4,13 +4,18 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Deck</title>
-<link rel="stylesheet" href="/viewer/viewer.css">
+<link rel="stylesheet" href="/ui/viewer.css">
 </head>
 <body>
-<main id="stage">
-  <iframe id="deck" title="Slides"></iframe>
-  <div id="error" hidden></div>
-</main>
+<div id="work">
+  <nav id="strip" aria-label="Slide thumbnails">
+    <iframe id="thumbs" title="Slide thumbnails" tabindex="-1"></iframe>
+  </nav>
+  <main id="stage">
+    <iframe id="deck" title="Slides"></iframe>
+    <div id="error" hidden></div>
+  </main>
+</div>
 <aside id="notes" hidden>
   <div class="notes-head">Speaker notes</div>
   <div id="notes-text"></div>
@@ -21,12 +26,16 @@
   <span id="counter">– / –</span>
   <button id="next" title="Next (→)" aria-label="Next">›</button>
   <span class="sep"></span>
+  <button id="strip-btn" title="Slide thumbnails down the left (T)">Thumbnails</button>
   <button id="grid-btn" title="All slides (G)">Grid</button>
   <button id="notes-btn" title="Speaker notes (N)">Notes</button>
   <button id="fs-btn" title="Full screen (F)">Full screen</button>
   <span class="sep"></span>
-  <button id="pdf-btn" title="Download the deck as a PDF, one slide per page">Export PDF</button>
+  <button id="pdf-btn" title="Download the deck as a PDF, one slide per page">PDF</button>
+  <button id="pptx-btn" title="Download the deck as a PowerPoint file with real text, shapes and pictures">PowerPoint</button>
+  <span class="sep"></span>
+  <a id="home-link" href="/" title="All open decks">Decks</a>
 </nav>
-<script type="module" src="/viewer/viewer.js"></script>
+<script type="module" src="/ui/viewer.js"></script>
 </body>
 </html>

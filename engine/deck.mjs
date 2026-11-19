@@ -3,17 +3,25 @@
 // A deck folder holds project/deck.json, project/deck.css (when the index's `format`
 // lists it), project/slides/<id>.html, and the files those reference
 // (project/assets/…, project/ds/<folder>/…, or /_blob/<id> looked up locally).
+//
+// The engine takes a deck folder from anywhere on disk. It does not know about the viewer app.
 
 import fs from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 
-export const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname), "..", "..");
+/** base.css and elements.js: what every assembled deck page loads, served at /render/. */
+export const RENDER_DIR = path.join(path.dirname(fileURLToPath(import.meta.url)), "render");
 export const ID_RE = /^[A-Za-z0-9_-]{1,64}$/;
 const FAMILY_RE = /^[A-Za-z][A-Za-z0-9 _-]{0,39}$/;
 const SIZES = { "16:9": [1920, 1080], "4:3": [1440, 1080] };
 
-export function resolveDeck(arg) {
-  const candidates = arg ? [path.resolve(arg), path.join(ROOT, "decks", arg)] : [process.cwd()];
+/**
+ * The deck folder an argument names: a path (to the folder, or to its project/ folder),
+ * or a bare name under ./decks/. Paths are read from `cwd`. Returns an absolute path or null.
+ */
+export function resolveDeck(arg, cwd = process.cwd()) {
+  const candidates = arg ? [path.resolve(cwd, arg), path.join(cwd, "decks", arg)] : [cwd];
   for (const c of candidates) {
     if (fs.existsSync(path.join(c, "project", "deck.json"))) return c;
     // Pointed at the project/ folder itself.
@@ -22,8 +30,9 @@ export function resolveDeck(arg) {
   return null;
 }
 
-export function listDecks() {
-  const dir = path.join(ROOT, "decks");
+/** The decks under ./decks/, for a command's usage text. */
+export function listDecks(cwd = process.cwd()) {
+  const dir = path.join(cwd, "decks");
   if (!fs.existsSync(dir)) return [];
   return fs.readdirSync(dir).filter((n) => fs.existsSync(path.join(dir, n, "project", "deck.json")));
 }
@@ -111,7 +120,8 @@ function inertEmbeds(html) {
 }
 
 /**
- * The deck as one HTML page, served at /deck/ (so `project/…` paths resolve).
+ * The deck as one HTML page, served at …/deck/ (so `project/…` paths resolve), with the
+ * renderer's files at /render/.
  * mode "present": the viewer shows one slide at a time. mode "all": every slide stacked.
  * fonts false: the deck's faces are left out, so every font stack shows its next (basic) face.
  */
@@ -131,12 +141,12 @@ export function buildDeck(deckDir, { mode = "present", fonts = true } = {}) {
 <meta charset="utf-8">
 <title>${esc(idx.title)}</title>
 ${fonts ? fontHead(idx.faces) : ""}
-<link rel="stylesheet" href="/viewer/base.css">
+<link rel="stylesheet" href="/render/base.css">
 ${sharedLinks}
 </head>
 <body>
 ${sections.join("\n\n")}
-<script src="/viewer/elements.js"></script>
+<script src="/render/elements.js"></script>
 </body>
 </html>
 `;

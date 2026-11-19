@@ -5,13 +5,16 @@
 //
 // Writes <deck>/.preview/NN-<id>.png (one per slide) and <deck>/.preview/sheet.png (all slides,
 // numbered), then prints the problems it found per slide. Needs Node 22+ and a Chrome,
-// Chromium, Edge or Brave install (or CHROME_PATH).
+// Chromium, Edge or Brave install (or CHROME_PATH). The viewer app need not be running.
 
 import fs from "node:fs";
 import path from "node:path";
-import { resolveDeck, listDecks, readIndex } from "./lib/deck.mjs";
-import { createDeckServer } from "./lib/server.mjs";
-import { launch, evaluate, openDeck, scrollTo } from "./lib/chrome.mjs";
+import { readIndex } from "../engine/deck.mjs";
+import { parseRange, usage, deckOrExit, shortPath } from "../engine/args.mjs";
+import { createRenderServer } from "../engine/serve.mjs";
+import { launch, evaluate, openDeck, scrollTo } from "../engine/chrome.mjs";
+
+const USAGE = "node scripts/preview.mjs <deck-dir | deck-name> [--slides 3,5-7] [--scale 0.5] [--json]";
 
 // ---------- args ----------
 
@@ -25,32 +28,11 @@ for (let i = 0; i < args.length; i++) {
   if (a === "--scale") scale = Number(args[++i]);
   else if (a === "--slides") only = parseRange(args[++i]);
   else if (a === "--json") asJson = true;
-  else if (a === "-h" || a === "--help") usage(0);
+  else if (a === "-h" || a === "--help") usage(USAGE, 0);
   else deckArg = a;
 }
 
-function usage(code) {
-  console.log("usage: node scripts/preview.mjs <deck-dir | deck-name> [--slides 3,5-7] [--scale 0.5] [--json]");
-  const decks = listDecks();
-  if (decks.length) console.log("\ndecks:\n" + decks.map((n) => "  " + n).join("\n"));
-  process.exit(code);
-}
-
-function parseRange(s) {
-  const set = new Set();
-  for (const part of String(s || "").split(",")) {
-    const m = part.trim().match(/^(\d+)(?:-(\d+))?$/);
-    if (!m) continue;
-    for (let n = Number(m[1]); n <= Number(m[2] || m[1]); n++) set.add(n);
-  }
-  return set.size ? set : null;
-}
-
-const deckDir = resolveDeck(deckArg);
-if (!deckDir) {
-  console.error(deckArg ? `No project/deck.json found for "${deckArg}".` : "Which deck?");
-  usage(1);
-}
+const deckDir = deckOrExit(deckArg, USAGE);
 const index = readIndex(deckDir);
 
 // ---------- the lint, run inside the page ----------
@@ -326,13 +308,12 @@ const outDir = path.join(deckDir, ".preview");
 fs.mkdirSync(outDir, { recursive: true });
 for (const f of fs.readdirSync(outDir)) if (f.endsWith(".png")) fs.rmSync(path.join(outDir, f));
 
-const { listen, close: closeServer } = createDeckServer(deckDir, { watch: false });
-const port = await listen(0);
+const server = await createRenderServer(deckDir);
 let browser;
 try {
   browser = await launch();
   const { send } = browser;
-  await openDeck(browser, port, index);
+  await openDeck(browser, server.url, index);
 
   const report = await evaluate(send, `(${lintPage.toString()})()`);
   const tops = await evaluate(send, `[...document.querySelectorAll("body > section")].filter(s => !s.hidden).map(s => s.getBoundingClientRect().top + scrollY)`);
@@ -379,9 +360,8 @@ try {
   if (asJson) {
     console.log(JSON.stringify({ deck: deckDir, preview: outDir, slides: shown }, null, 2));
   } else {
-    const rel = outDir.startsWith(process.cwd() + path.sep) ? path.relative(process.cwd(), outDir) : outDir;
     console.log(`${index.title}: ${report.length} slides`);
-    console.log(`screenshots: ${rel}/  (sheet.png = all slides, numbered)\n`);
+    console.log(`screenshots: ${shortPath(outDir)}/  (sheet.png = all slides, numbered)\n`);
     const mark = { error: "✗", warn: "!", note: "·" };
     let errors = 0, warns = 0;
     for (const r of shown) {
@@ -398,5 +378,5 @@ try {
   process.exitCode = 1;
 } finally {
   browser?.close();
-  closeServer();
+  server.close();
 }
